@@ -1,0 +1,5 @@
+body { background: #1a1a2e; color: #00ff00; font-family: 'Courier New', Courier, monospace; }
+.arcade-box { border: 4px solid #fff; padding: 20px; background: #0f3460; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.task-card { border: 2px solid #e94560; padding: 10px; cursor: grab; background: #533483; }
+.drop-zone { border: 2px dashed #00ff00; min-height: 100px; }

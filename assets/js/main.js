@@ -1,7 +1,6 @@
 import { escenarios as dataInicial } from './data.js';
 import { GameLogic } from './game.js';
 
-// Usamos un objeto mutable para los escenarios
 let escenarios = { ...dataInicial };
 const container = document.getElementById('game-container');
 
@@ -15,6 +14,10 @@ const App = {
                     <button id="btn-jugar" class="bg-green-500 text-slate-900 px-8 py-3 font-bold">JUGAR</button>
                     <button id="btn-config" class="bg-purple-600 text-white px-8 py-3 font-bold">MODIFICAR ESCENARIOS</button>
                 </div>
+                <div id="ranking-list" class="mt-6 text-green-300 border-t border-slate-700 pt-4">
+                    <h3 class="text-xl mb-2">TOP 5 RÉCORDS</h3>
+                    ${ranking.length > 0 ? ranking.map(r => `<p class="font-mono">${r.nombre}: ${GameLogic.formatearTiempo(r.tiempo)}</p>`).join('') : '<p>No hay récords aún.</p>'}
+                </div>
             </div>`;
         document.getElementById('btn-jugar').onclick = () => {
             const nombre = document.getElementById('nombre').value;
@@ -26,26 +29,33 @@ const App = {
     renderConfig: () => {
         container.innerHTML = `
             <div class="bg-slate-800 p-6 rounded-xl max-w-lg mx-auto mt-10">
+                <h2 class="text-white mb-2 font-bold">Editar JSON de Escenarios:</h2>
                 <textarea id="json-input" class="w-full h-60 bg-black text-green-400 p-4 font-mono text-xs">${JSON.stringify(escenarios, null, 2)}</textarea>
                 <div class="flex flex-col gap-2 mt-4">
                     <button id="btn-save" class="bg-blue-600 p-3 text-white">GUARDAR ESCENARIOS</button>
+                    <button id="btn-borrar" class="bg-red-600 p-3 text-white">BORRAR TODO EL HISTÓRICO</button>
                     <button id="btn-back" class="bg-slate-600 p-3 text-white">VOLVER</button>
                 </div>
             </div>`;
         document.getElementById('btn-save').onclick = () => {
             try {
                 escenarios = JSON.parse(document.getElementById('json-input').value);
-                alert("Escenarios actualizados dinámicamente");
+                alert("Escenarios guardados.");
                 App.init();
-            } catch(e) { alert("Error en el formato JSON"); }
+            } catch(e) { alert("Error: JSON inválido"); }
+        };
+        document.getElementById('btn-borrar').onclick = () => {
+            if(confirm("¿Estás seguro? Se borrarán todos los récords.")) {
+                localStorage.removeItem('rankingArcade');
+                alert("Histórico borrado.");
+                App.init();
+            }
         };
         document.getElementById('btn-back').onclick = App.init;
     },
 
     mostrarEscenarios: (nombre) => {
         container.innerHTML = `<div class="bg-slate-800 p-6 rounded-xl text-center max-w-lg mx-auto mt-10"><h2 class="text-2xl mb-4 text-white">Elige Misión</h2></div>`;
-        
-        // Generación dinámica de botones basada en las llaves del objeto 'escenarios'
         Object.keys(escenarios).forEach(key => {
             const btn = document.createElement('button');
             btn.className = "block w-full bg-slate-700 m-2 p-6 text-white hover:bg-green-600 font-bold uppercase";
@@ -53,7 +63,6 @@ const App = {
             btn.onclick = () => App.ejecutarJuego(nombre, key);
             container.querySelector('div').appendChild(btn);
         });
-        
         const backBtn = document.createElement('button');
         backBtn.className = "bg-red-600 p-4 w-full mt-4 text-white font-bold";
         backBtn.innerText = "VOLVER AL INICIO";
@@ -86,8 +95,8 @@ const App = {
 
         GameLogic.configurarDrag();
         document.getElementById('btn-finalizar').onclick = () => {
-            const calendario = document.getElementById('calendario');
-            const tareasOrdenadas = Array.from(calendario.children).map(el => tareas[parseInt(el.id.split('-')[1])]);
+            const tareasOrdenadas = Array.from(document.getElementById('calendario').children)
+                .map(el => tareas[parseInt(el.id.split('-')[1])]);
             let total = 0;
             let html = `<h3 class='text-green-400 mb-2 font-bold'>Resumen:</h3>`;
             tareasOrdenadas.forEach((t, i) => {
@@ -95,6 +104,7 @@ const App = {
                 total += t.tiempo + pen;
                 html += `<p class='text-sm'>${t.nombre}: ${t.tiempo}s ${pen > 0 ? `<span class='text-yellow-400'>+60s (cambio ${tareasOrdenadas[i-1].lugar[0].toUpperCase()}→${t.lugar[0].toUpperCase()})</span>` : ''}</p>`;
             });
+            GameLogic.guardarPuntuacion(nombre, total);
             document.getElementById('resumen-detalle').innerHTML = html + `<p class='font-bold mt-2 text-lg'>TOTAL: ${GameLogic.formatearTiempo(total)}</p>`;
         };
         document.getElementById('btn-reiniciar').onclick = () => App.ejecutarJuego(nombre, key);

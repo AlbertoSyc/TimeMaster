@@ -7,7 +7,7 @@ function init() {
     const ranking = JSON.parse(localStorage.getItem('rankingArcade') || '[]');
     container.innerHTML = `
         <div class="arcade-box">
-            <h1>TIME ARCADE</h1>
+            <h1>TIME ARCADE</h1> 
             <input type="text" id="nombre" placeholder="Nombre...">
             <button id="btn-jugar">JUGAR</button>
             <div id="ranking-list"><h3>TOP 5</h3>${ranking.map(r => `<p>${r.nombre}: ${r.tiempo}s</p>`).join('')}</div>

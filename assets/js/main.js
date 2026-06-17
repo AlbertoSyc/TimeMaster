@@ -15,7 +15,7 @@ function init() {
     `;
     document.getElementById('btn-jugar').onclick = () => {
         const nombre = document.getElementById('nombre').value;
-        if(nombre) mostrarEscenarios(nombre);
+        if(nombre) mostrarEscenarios(nombre); 
     };
 }
 

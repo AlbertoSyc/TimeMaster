@@ -112,8 +112,5 @@ const App = {
     }
 };
 
-<<<<<<< Updated upstream
 App.init();
-=======
-App.init();
->>>>>>> Stashed changes
+

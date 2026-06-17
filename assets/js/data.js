@@ -18,15 +18,11 @@ export const escenarios = {
         { id: 2, nombre: "Poner bañador", lugar: "vestuario", tiempo: 120 },
         { id: 3, nombre: "Hacer coleta", lugar: "vestuario", tiempo: 120 }
     ],
-  higiene_noche: [
-    { id: 1, nombre: "Recoger juguetes", lugar: "habitacion", tiempo: 300 },
-    { id: 2, nombre: "Poner ropa en cesto", lugar: "baño", tiempo: 60 },
-    { id: 3, nombre: "Ponerse pijama", lugar: "habitacion", tiempo: 180 },
-    { id: 4, nombre: "Lavarse dientes", lugar: "baño", tiempo: 180 },
-    { id: 5, nombre: "Elegir cuento", lugar: "biblioteca", tiempo: 120 }
-  ]
-<<<<<<< Updated upstream
+    higiene_noche: [
+        { id: 1, nombre: "Recoger juguetes", lugar: "habitacion", tiempo: 300 },
+        { id: 2, nombre: "Poner ropa en cesto", lugar: "baño", tiempo: 60 },
+        { id: 3, nombre: "Ponerse pijama", lugar: "habitacion", tiempo: 180 },
+        { id: 4, nombre: "Lavarse dientes", lugar: "baño", tiempo: 180 },
+        { id: 5, nombre: "Elegir cuento", lugar: "biblioteca", tiempo: 120 }
+    ]
 };
-=======
-};
->>>>>>> Stashed changes

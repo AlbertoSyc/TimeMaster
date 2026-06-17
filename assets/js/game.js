@@ -30,8 +30,6 @@ export const GameLogic = {
             if (el) dropZone.appendChild(el);
         });
     }
-<<<<<<< Updated upstream
+
 };
-=======
-};
->>>>>>> Stashed changes
+

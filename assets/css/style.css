@@ -1,4 +1,8 @@
 .arcade-font { font-family: 'Press Start 2P', cursive; }
 .drop-zone { min-height: 200px; transition: all 0.3s; }
 .task-card { cursor: grab; transition: transform 0.2s; }
+<<<<<<< Updated upstream
 .task-card:active { transform: scale(0.95); }
+=======
+.task-card:active { transform: scale(0.95); }
+>>>>>>> Stashed changes

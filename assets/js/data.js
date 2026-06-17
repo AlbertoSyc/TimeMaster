@@ -25,4 +25,8 @@ export const escenarios = {
     { id: 4, nombre: "Lavarse dientes", lugar: "baño", tiempo: 180 },
     { id: 5, nombre: "Elegir cuento", lugar: "biblioteca", tiempo: 120 }
   ]
+<<<<<<< Updated upstream
 };
+=======
+};
+>>>>>>> Stashed changes

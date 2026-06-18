@@ -2,6 +2,7 @@ export const GameLogic = {
     formatearTiempo: (segundos) => {
         const mins = Math.floor(segundos / 60);
         const secs = segundos % 60;
+        if (mins === 0) return `${secs} segundos`;
         return `${mins} min y ${secs} seg`;
     },
     calcularTiempo: (tareas) => {
@@ -21,7 +22,9 @@ export const GameLogic = {
     configurarDrag: () => {
         const cards = document.querySelectorAll('.task-card');
         const dropZone = document.getElementById('calendario');
-        cards.forEach(card => card.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', e.target.id)));
+        cards.forEach(card => {
+            card.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', e.target.id));
+        });
         dropZone.addEventListener('dragover', (e) => e.preventDefault());
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
@@ -30,6 +33,4 @@ export const GameLogic = {
             if (el) dropZone.appendChild(el);
         });
     }
-
 };
-

@@ -48,7 +48,7 @@ const App = {
         container.innerHTML = `<div id="sub-cont" class="max-w-lg mx-auto p-8"></div>`;
         const cont = document.getElementById('sub-cont');
         const juegos = tipo === 'externo' ? 
-            [{n: "Time Timer", f: App.juegoTimeTimer}, {n: "Línea del Tiempo", f: App.juegoLinea}, {n: "Colores", f: App.juegoColores}] : 
+            [{n: "Time Timer", f: App.juegoTimeTimer}, {n: "Línea del Tiempo", f: App.juegoLinea}] : 
             [{n: "Mi Apuesta", f: App.juegoApuesta}, {n: "Pasos Hormiga", f: App.juegoHormiga}];
         
         juegos.forEach(j => {
@@ -59,8 +59,7 @@ const App = {
             cont.appendChild(b);
         });
         const back = document.createElement('button');
-        back.innerText = "VOLVER";
-        back.className = "w-full bg-red-600 p-4 mt-4 text-white font-bold";
+        back.innerText = "VOLVER"; back.className = "w-full bg-red-600 p-4 mt-4 text-white font-bold";
         back.addEventListener('click', App.menuCategorias);
         cont.appendChild(back);
     },
@@ -101,35 +100,20 @@ const App = {
             const t = document.getElementById('tarea').value;
             if(t) {
                 const div = document.createElement('div');
-                div.className = "bg-white text-black p-4 rounded min-w-[100px]";
+                div.className = "bg-white text-black p-4 rounded min-w-[100px] cursor-pointer";
                 div.innerText = t;
-                div.addEventListener('click', (e) => e.target.classList.toggle('bg-green-500'));
+                div.addEventListener('click', (e) => e.target.classList.toggle('line-through'));
                 document.getElementById('linea').appendChild(div);
+                document.getElementById('tarea').value = "";
             }
         });
-        document.getElementById('btn-back').addEventListener('click', () => App.renderSub('externo'));
-    },
-
-    juegoColores: () => {
-        container.innerHTML = `<div class="max-w-lg mx-auto mt-10 p-8 bg-slate-800 text-white text-center">
-            <h2 class="text-xl font-bold">Arrastra a su zona</h2>
-            <div class="grid grid-cols-3 gap-2 my-4">
-                <div id="zona-estudio" class="bg-red-900 p-4 h-24">ESTUDIO</div>
-                <div id="zona-baño" class="bg-blue-900 p-4 h-24">BAÑO</div>
-                <div id="zona-juego" class="bg-green-900 p-4 h-24">JUEGO</div>
-            </div>
-            <div id="tareas" class="flex gap-2 justify-center">
-                <div draggable="true" class="bg-white text-black p-2" data-zona="zona-estudio">Deberes</div>
-            </div>
-            <button id="btn-back" class="w-full mt-4 bg-slate-600 p-2">VOLVER</button>
-        </div>`;
         document.getElementById('btn-back').addEventListener('click', () => App.renderSub('externo'));
     },
 
     juegoApuesta: () => {
         container.innerHTML = `<div class="max-w-md mx-auto mt-10 p-8 bg-slate-800 text-white rounded-xl">
             <input type="number" id="apuesta" class="w-full p-3 text-black mb-4" placeholder="Segundos que crees tardar">
-            <div id="progress-bar" class="w-full h-4 bg-slate-600 rounded-full mb-4"><div id="progress" class="h-full bg-purple-500 w-0"></div></div>
+            <div id="progress-bar" class="w-full h-4 bg-slate-600 rounded-full mb-4 overflow-hidden"><div id="progress" class="h-full bg-purple-500 w-0 transition-all duration-500"></div></div>
             <div id="cron" class="text-5xl font-mono text-center mb-6">00:00</div>
             <button id="btn-cron" class="w-full bg-purple-600 p-4 font-bold rounded">INICIAR / PARAR</button>
             <button id="btn-back" class="w-full mt-4 text-slate-400">VOLVER</button>
@@ -156,7 +140,7 @@ const App = {
             if(val) {
                 const div = document.createElement('div');
                 div.className = "bg-slate-700 p-2 my-1 rounded flex justify-between";
-                div.innerHTML = `<span>🐜 ${val}</span><input type="checkbox">`;
+                div.innerHTML = `<label><input type="checkbox"> ${val}</label>`;
                 document.getElementById('lista-pasos').appendChild(div);
                 document.getElementById('input-paso').value = "";
             }
@@ -166,22 +150,60 @@ const App = {
 
     mostrarEscenarios: () => {
         container.innerHTML = `<div id="esc-cont" class="max-w-lg mx-auto p-8"></div>`;
+        const cont = document.getElementById('esc-cont');
         Object.keys(escenarios).forEach(key => {
             const b = document.createElement('button');
             b.className = "w-full bg-blue-700 p-4 my-2 text-white font-bold";
             b.innerText = key.replace('_', ' ');
-            b.addEventListener('click', () => alert("Iniciando: " + key));
-            document.getElementById('esc-cont').appendChild(b);
+            b.addEventListener('click', () => App.ejecutarJuego(key));
+            cont.appendChild(b);
         });
         const back = document.createElement('button');
-        back.innerText = "VOLVER";
-        back.className = "w-full bg-red-600 p-4 mt-4 text-white font-bold";
+        back.innerText = "VOLVER"; back.className = "w-full bg-red-600 p-4 mt-4 text-white font-bold";
         back.addEventListener('click', App.menuCategorias);
-        document.getElementById('esc-cont').appendChild(back);
+        cont.appendChild(back);
     },
 
-    renderConfig: () => { 
-        container.innerHTML = `<div class="p-8 text-white text-center"><h1>AJUSTES</h1><button id="btn-back" class="bg-red-600 p-4">VOLVER</button></div>`;
+    ejecutarJuego: (key) => {
+        const tareas = escenarios[key];
+        container.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-2xl mx-auto mt-10">
+            <div id="lista-tareas" class="bg-slate-800 p-4 border rounded"></div>
+            <div id="calendario" class="bg-slate-900 border-2 border-dashed border-green-500 p-4 rounded"></div>
+        </div>
+        <div class="flex gap-2 max-w-2xl mx-auto mt-4">
+            <button id="btn-finalizar" class="flex-1 bg-green-600 p-4 font-bold">TERMINAR</button>
+            <button id="btn-volver" class="flex-1 bg-red-600 p-4 font-bold text-white">VOLVER</button>
+        </div>
+        <div id="resumen-detalle" class="max-w-2xl mx-auto mt-6 text-white"></div>`;
+        tareas.forEach((t, i) => {
+            const div = document.createElement('div');
+            div.className = 'bg-purple-700 p-4 m-2 text-white cursor-grab';
+            div.id = 'task-' + i; div.draggable = true;
+            div.innerText = t.nombre;
+            document.getElementById('lista-tareas').appendChild(div);
+            div.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', e.target.id));
+        });
+        const cal = document.getElementById('calendario');
+        cal.addEventListener('dragover', (e) => e.preventDefault());
+        cal.addEventListener('drop', (e) => cal.appendChild(document.getElementById(e.dataTransfer.getData('text'))));
+        document.getElementById('btn-finalizar').addEventListener('click', () => {
+            const total = GameLogic.calcularTiempo(Array.from(cal.children).map(el => tareas[parseInt(el.id.split('-')[1])]));
+            document.getElementById('resumen-detalle').innerHTML = `<p class='text-2xl'>TOTAL: ${GameLogic.formatearTiempo(total)}</p>`;
+        });
+        document.getElementById('btn-volver').addEventListener('click', App.mostrarEscenarios);
+    },
+
+    renderConfig: () => {
+        container.innerHTML = `<div class="max-w-lg mx-auto mt-10 p-8 bg-slate-800 text-white">
+            <h2 class="font-bold mb-4">EDITOR</h2>
+            <textarea id="json-input" class="w-full h-40 text-black p-2">${JSON.stringify(escenarios, null, 2)}</textarea>
+            <button id="btn-save" class="bg-blue-600 w-full p-2 mt-2">GUARDAR</button>
+            <button id="btn-back" class="bg-slate-600 w-full p-2 mt-2">VOLVER</button>
+        </div>`;
+        document.getElementById('btn-save').addEventListener('click', () => {
+            try { Object.assign(escenarios, JSON.parse(document.getElementById('json-input').value)); alert("Guardado"); }
+            catch(e) { alert("Error JSON"); }
+        });
         document.getElementById('btn-back').addEventListener('click', App.init);
     }
 };

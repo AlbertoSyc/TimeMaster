@@ -48,9 +48,8 @@ const App = {
         container.innerHTML = `<div id="sub-cont" class="max-w-lg mx-auto p-8"></div>`;
         const cont = document.getElementById('sub-cont');
         const juegos = tipo === 'externo' ? 
-            [{n: "Time Timer", f: App.juegoTimeTimer}, {n: "Línea del Tiempo", f: App.juegoLinea}] : 
+            [{n: "Time Timer", f: App.juegoTimeTimer}, {n: "Línea del Tiempo", f: App.juegoLinea}, {n: "Colores", f: App.juegoColores}] : 
             [{n: "Mi Apuesta", f: App.juegoApuesta}, {n: "Pasos Hormiga", f: App.juegoHormiga}];
-        
         juegos.forEach(j => {
             const b = document.createElement('button');
             b.className = "w-full bg-slate-700 p-4 my-2 text-white rounded font-bold hover:bg-slate-600";
@@ -67,20 +66,22 @@ const App = {
     juegoTimeTimer: () => {
         container.innerHTML = `<div class="max-w-md mx-auto mt-10 text-center bg-slate-800 p-8 rounded-xl text-white">
             <h2 class="text-2xl mb-4 font-bold">Time Timer</h2>
+            <input type="number" id="minutos" value="5" class="text-black p-2 mb-4 w-20">
             <div class="w-48 h-48 mx-auto bg-white rounded-full relative overflow-hidden mb-6 border-4 border-slate-600">
                 <div id="disco" class="absolute inset-0 bg-red-600 origin-center transition-transform duration-1000 ease-linear" style="clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%)"></div>
             </div>
-            <div id="timer-text" class="text-4xl font-mono mb-6">05:00</div>
-            <button id="btn-start" class="bg-green-600 px-8 py-3 font-bold rounded">INICIAR 5 MIN</button>
+            <div id="timer-text" class="text-4xl font-mono mb-6">00:00</div>
+            <button id="btn-start" class="bg-green-600 px-8 py-3 font-bold rounded">INICIAR</button>
             <button id="btn-back" class="block w-full mt-4 text-slate-400">VOLVER</button>
         </div>`;
         document.getElementById('btn-start').addEventListener('click', () => {
-            let s = 300;
+            let m = parseInt(document.getElementById('minutos').value);
+            let s = m * 60;
             const d = document.getElementById('disco');
             const t = document.getElementById('timer-text');
             const i = setInterval(() => {
                 s--;
-                d.style.transform = `rotate(${(300 - s) * (360/300)}deg)`;
+                d.style.transform = `rotate(${(m*60 - s) * (360/(m*60))}deg)`;
                 t.innerText = Math.floor(s/60) + ":" + (s%60).toString().padStart(2,'0');
                 if(s <= 0) { clearInterval(i); alert("¡Tiempo terminado!"); }
             }, 1000);
@@ -110,6 +111,17 @@ const App = {
         document.getElementById('btn-back').addEventListener('click', () => App.renderSub('externo'));
     },
 
+    juegoColores: () => {
+        container.innerHTML = `<div class="max-w-lg mx-auto mt-10 p-8 bg-slate-800 text-white text-center">
+            <h2 class="text-xl font-bold">Clasificación Colores</h2>
+            <div class="flex gap-4 justify-center my-4">
+                <div id="zona" class="bg-slate-900 p-10 border-2 border-dashed border-green-500">ZONA</div>
+            </div>
+            <button id="btn-back" class="w-full mt-4 bg-slate-600 p-2">VOLVER</button>
+        </div>`;
+        document.getElementById('btn-back').addEventListener('click', () => App.renderSub('externo'));
+    },
+
     juegoApuesta: () => {
         container.innerHTML = `<div class="max-w-md mx-auto mt-10 p-8 bg-slate-800 text-white rounded-xl">
             <input type="number" id="apuesta" class="w-full p-3 text-black mb-4" placeholder="Segundos que crees tardar">
@@ -121,7 +133,7 @@ const App = {
         let seg = 0, run = false, interval;
         document.getElementById('btn-cron').addEventListener('click', () => {
             const prog = document.getElementById('progress');
-            if(!run) { run = true; interval = setInterval(() => { seg++; document.getElementById('cron').innerText = `00:${seg.toString().padStart(2,'0')}`; prog.style.width = Math.min((seg/60)*100, 100) + "%"; }, 1000); }
+            if(!run) { run = true; interval = setInterval(() => { seg++; document.getElementById('cron').innerText = seg; prog.style.width = Math.min((seg/60)*100, 100) + "%"; }, 1000); }
             else { clearInterval(interval); alert("Finalizado en " + seg + "s"); }
         });
         document.getElementById('btn-back').addEventListener('click', () => App.renderSub('estimacion'));
@@ -174,7 +186,7 @@ const App = {
             <button id="btn-finalizar" class="flex-1 bg-green-600 p-4 font-bold">TERMINAR</button>
             <button id="btn-volver" class="flex-1 bg-red-600 p-4 font-bold text-white">VOLVER</button>
         </div>
-        <div id="resumen-detalle" class="max-w-2xl mx-auto mt-6 text-white"></div>`;
+        <div id="resumen-detalle" class="max-w-2xl mx-auto mt-6 text-white p-4"></div>`;
         tareas.forEach((t, i) => {
             const div = document.createElement('div');
             div.className = 'bg-purple-700 p-4 m-2 text-white cursor-grab';
@@ -187,8 +199,15 @@ const App = {
         cal.addEventListener('dragover', (e) => e.preventDefault());
         cal.addEventListener('drop', (e) => cal.appendChild(document.getElementById(e.dataTransfer.getData('text'))));
         document.getElementById('btn-finalizar').addEventListener('click', () => {
-            const total = GameLogic.calcularTiempo(Array.from(cal.children).map(el => tareas[parseInt(el.id.split('-')[1])]));
-            document.getElementById('resumen-detalle').innerHTML = `<p class='text-2xl'>TOTAL: ${GameLogic.formatearTiempo(total)}</p>`;
+            const tareasOrdenadas = Array.from(cal.children).map(el => tareas[parseInt(el.id.split('-')[1])]);
+            let total = 0;
+            let html = `<h3 class='text-green-400 mb-2 font-bold'>Desglose del tiempo:</h3>`;
+            tareasOrdenadas.forEach((t, i) => {
+                let pen = (i > 0 && t.lugar !== tareasOrdenadas[i-1].lugar) ? 60 : 0;
+                total += t.tiempo + pen;
+                html += `<p class='text-sm border-b border-slate-700 py-1'>${t.nombre}: ${t.tiempo}s ${pen > 0 ? `<span class='text-yellow-400'>+60s (cambio lugar)</span>` : ''}</p>`;
+            });
+            document.getElementById('resumen-detalle').innerHTML = html + `<p class='font-bold mt-4 text-2xl text-center bg-green-500 text-slate-900 py-2 rounded'>TOTAL: ${GameLogic.formatearTiempo(total)}</p>`;
         });
         document.getElementById('btn-volver').addEventListener('click', App.mostrarEscenarios);
     },

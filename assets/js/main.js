@@ -53,12 +53,11 @@ const App = {
         
         juegos.forEach(j => {
             const b = document.createElement('button');
-            b.className = "w-full bg-slate-700 p-4 my-2 text-white rounded font-bold";
+            b.className = "w-full bg-slate-700 p-4 my-2 text-white rounded font-bold hover:bg-slate-600";
             b.innerText = j.n;
             b.addEventListener('click', j.f);
             cont.appendChild(b);
         });
-        
         const back = document.createElement('button');
         back.innerText = "VOLVER";
         back.className = "w-full bg-red-600 p-4 mt-4 text-white font-bold";
@@ -66,20 +65,85 @@ const App = {
         cont.appendChild(back);
     },
 
-    // --- MANTENIMIENTO DE TUS JUEGOS ---
-    juegoTimeTimer: () => { App.renderBasicGame("Time Timer", "externo"); },
-    juegoLinea: () => { App.renderBasicGame("Línea del Tiempo", "externo"); },
-    juegoApuesta: () => { App.renderBasicGame("Mi Apuesta", "estimacion"); },
-    juegoHormiga: () => { App.renderBasicGame("Pasos Hormiga", "estimacion"); },
-
-    renderBasicGame: (titulo, tipo) => {
+    juegoTimeTimer: () => {
         container.innerHTML = `
-            <div class="p-8 text-white text-center">
-                <h2 class="text-2xl font-bold mb-4">${titulo}</h2>
-                <div class="bg-slate-800 p-10 rounded">LÓGICA DEL JUEGO AQUÍ</div>
-                <button id="btn-back" class="mt-4 bg-slate-600 p-2">VOLVER</button>
+            <div class="max-w-md mx-auto mt-10 text-center bg-slate-800 p-8 rounded-xl">
+                <h2 class="text-white mb-4">Time Timer (Visualizador)</h2>
+                <div class="w-48 h-48 mx-auto bg-white rounded-full relative overflow-hidden mb-6 border-4 border-slate-600">
+                    <div id="disco" class="absolute inset-0 bg-red-600 origin-center transition-transform duration-1000 ease-linear"></div>
+                </div>
+                <div id="timer-text" class="text-4xl text-white font-mono mb-6">05:00</div>
+                <button id="btn-start" class="bg-green-600 px-8 py-3 text-white font-bold rounded">INICIAR 5 MIN</button>
+                <button id="btn-back" class="block w-full mt-4 text-slate-400">VOLVER</button>
             </div>`;
-        document.getElementById('btn-back').addEventListener('click', () => App.renderSub(tipo));
+        document.getElementById('btn-start').addEventListener('click', () => {
+            let s = 300;
+            const d = document.getElementById('disco');
+            const t = document.getElementById('timer-text');
+            const i = setInterval(() => {
+                s--;
+                d.style.transform = `rotate(${(300 - s) * (360/300)}deg)`;
+                t.innerText = Math.floor(s/60) + ":" + (s%60).toString().padStart(2,'0');
+                if(s <= 0) { clearInterval(i); alert("¡Tiempo terminado!"); }
+            }, 1000);
+        });
+        document.getElementById('btn-back').addEventListener('click', () => App.renderSub('externo'));
+    },
+
+    juegoApuesta: () => {
+        container.innerHTML = `
+            <div class="max-w-md mx-auto mt-10 p-8 bg-slate-800 text-white rounded-xl">
+                <input type="number" id="apuesta" class="w-full p-3 text-black mb-4" placeholder="Segundos que crees tardar">
+                <div id="progress-bar" class="w-full h-4 bg-slate-600 rounded-full mb-4 overflow-hidden">
+                    <div id="progress" class="h-full bg-purple-500 w-0 transition-all duration-500"></div>
+                </div>
+                <div id="cron" class="text-5xl font-mono text-center mb-6">00:00</div>
+                <button id="btn-cron" class="w-full bg-purple-600 p-4 font-bold rounded">INICIAR / PARAR</button>
+                <button id="btn-back" class="w-full mt-4 text-slate-400">VOLVER</button>
+            </div>`;
+        let seg = 0, run = false, interval;
+        document.getElementById('btn-cron').addEventListener('click', () => {
+            const prog = document.getElementById('progress');
+            if(!run) {
+                run = true;
+                interval = setInterval(() => {
+                    seg++;
+                    document.getElementById('cron').innerText = `00:${seg.toString().padStart(2,'0')}`;
+                    prog.style.width = Math.min((seg/60)*100, 100) + "%";
+                }, 1000);
+            } else {
+                clearInterval(interval);
+                alert("Terminado en " + seg + "s. Tu apuesta: " + document.getElementById('apuesta').value);
+            }
+        });
+        document.getElementById('btn-back').addEventListener('click', () => App.renderSub('estimacion'));
+    },
+
+    juegoHormiga: () => {
+        container.innerHTML = `
+            <div class="max-w-lg mx-auto mt-10 p-8 bg-slate-800 text-white rounded-xl">
+                <h2 class="text-xl mb-4">Pasos Hormiga (Mini-tareas)</h2>
+                <div id="lista-pasos" class="mb-4"></div>
+                <input type="text" id="input-paso" class="w-full p-2 text-black mb-2" placeholder="Nuevo paso...">
+                <button id="btn-add" class="w-full bg-purple-600 p-2 mb-4">AÑADIR PASO</button>
+                <button id="btn-back" class="w-full text-slate-400">VOLVER</button>
+            </div>`;
+        document.getElementById('btn-add').addEventListener('click', () => {
+            const val = document.getElementById('input-paso').value;
+            if(val) {
+                const div = document.createElement('div');
+                div.className = "bg-slate-700 p-2 my-1 rounded flex justify-between";
+                div.innerHTML = `<span>🐜 ${val}</span><input type="checkbox">`;
+                document.getElementById('lista-pasos').appendChild(div);
+                document.getElementById('input-paso').value = "";
+            }
+        });
+        document.getElementById('btn-back').addEventListener('click', () => App.renderSub('estimacion'));
+    },
+
+    juegoLinea: () => {
+        container.innerHTML = `<div class="p-8 text-white text-center"><h2>Línea del Tiempo (En desarrollo)</h2><button id="btn-back" class="bg-slate-600 p-2 mt-4">VOLVER</button></div>`;
+        document.getElementById('btn-back').addEventListener('click', () => App.renderSub('externo'));
     },
 
     mostrarEscenarios: () => {
@@ -89,7 +153,7 @@ const App = {
             const b = document.createElement('button');
             b.className = "w-full bg-blue-700 p-4 my-2 text-white font-bold";
             b.innerText = key.replace('_', ' ');
-            b.addEventListener('click', () => alert("Iniciando " + key));
+            b.addEventListener('click', () => alert("Iniciando: " + key));
             cont.appendChild(b);
         });
         const back = document.createElement('button');
